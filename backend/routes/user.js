@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const z = require('zod');
-const { User } = require('../db');
+const { User,Account } = require('../db');
 const jwt = require('jsonwebtoken');
 const { authMiddleware } = require('../middleware');
+require('dotenv').config();
+const JWT_secret = process.env.JWT_secret;
+
 
 const signupSchema = z.object({
-    username: z.string().enmail().min(3).max(30).trim().toLowerCase(),
+    username: z.string().email().min(3).max(30).trim().toLowerCase(),
     firstName: z.string().max(50).trim(),
     lastName: z.string().max(50).trim(),
     password: z.string().min(6)
@@ -33,7 +36,7 @@ router.post('/signup', async (req, res) => {
         })
     }
 
-    const existingUser = User.findOne({
+    const existingUser = await User.findOne({
         username: body.username
     })
 
@@ -48,7 +51,7 @@ router.post('/signup', async (req, res) => {
         password: req.body.password,
         firstName: req.body.firstName,
         lastName: req.body.lastName,
-    })
+    });
 
     const userId = user._id;
 
@@ -56,7 +59,7 @@ router.post('/signup', async (req, res) => {
     await Account.create({
         userId,
         balance: 1 + Math.random() * 10000
-    })
+    });
 
     const token = jwt.sign({
         userId
@@ -93,7 +96,7 @@ router.post('/signin', async (req, res) => {
         });
     } else {
         res.status(411).json({
-            message: "usernot found / signin error"
+            message: "user not found / signin error"
         });
     }
 
@@ -110,7 +113,7 @@ router.put('/', authMiddleware, async (req, res) => {
     }
 
     await User.updateOne(body, {
-        id: req.userId
+        _id: req.userId
     })
 });
 

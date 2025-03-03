@@ -1,7 +1,8 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const { authMiddleware } = require('../middleware');
-const { Account } = require('../db');
+const { User, Account } = require('../db');
 
 
 router.get('/balance', authMiddleware, async (req, res) => {

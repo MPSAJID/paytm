@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
-const { number } = require('zod');
-require('dotenv');
+require('dotenv').config();
 
-async () => {
-    await mongoose.connect("process.env.mongo_url");
-    console.log("Connected to MongoDB");
+
+const mongo_url = process.env.mongo_url;
+main().catch(err=> console.log("Error connecting to MongoDB"));
+async function main() {
+await mongoose.connect(mongo_url);
+console.log("Connected to MongoDB");
 }
 
 const userSchema = new mongoose.Schema({
@@ -36,10 +38,13 @@ const userSchema = new mongoose.Schema({
     }
 });
 
+const User = mongoose.model("User", userSchema);
+
+
 const accountSchema = new mongoose.Schema({
     userId: {
-        userID: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         required: true
     },
     balance: {
@@ -47,6 +52,8 @@ const accountSchema = new mongoose.Schema({
         required: true
     }
 });
+
+const Account = mongoose.model("Account",accountSchema);
 
 // UserSchema.methods.createHash = async function (plainTextPassword) {
 //     const saltRounds = 10;
@@ -57,8 +64,6 @@ const accountSchema = new mongoose.Schema({
 //   };
 
 
-const User = mongoose.model("User", userSchema);
-const Account = mongoose.model("Account",accountSchema);
 
 
 module.exports = {
